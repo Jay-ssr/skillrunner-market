@@ -2,6 +2,8 @@
 
 High-quality Claude Code skill plugins maintained by [Jay-ssr](https://github.com/Jay-ssr).
 
+[中文](./README_CN.md)
+
 ## Plugins
 
 | Plugin | Description | Category |
