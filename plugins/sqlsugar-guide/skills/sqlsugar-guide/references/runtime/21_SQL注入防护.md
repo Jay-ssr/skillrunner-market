@@ -1,0 +1,60 @@
+# SQL 注入防护
+
+## SQL 注入说明
+
+文档上的所有用例都是防注入的，只要按文档上写就不会有问题。唯一需要注意的是手写 SQL 部分并且从前端传进来。
+
+## 手写 SQL 部分
+
+外部 Sql 从页面传进来一般只有 `Order by` 和 `Where`，其他的基本不会从页面传过来，就算传进来构造难度也非常大。
+
+### OrderBy
+
+部分数据库本身就防注入，因为 Order 跟''直接就会报错不像 Where 可以构造，但是有些数据库还是可以注入。
+
+## 彻底防注入写法：
+
+```csharp
+// 使用类验证 防注入
+var orderByDbName = db.EntityMaintenance.GetDbColumnName<Order>(orderField); // 类中只要不存在属性名就会报错
+db.Queryable<Order>().OrderBy(orderByDbName + " " + OrderByType.Desc).ToList();
+
+// 自带函数过滤 防注入
+List<Order> list = db.Queryable<Order>().OrderBy(页面参数.ToSqlFilter()).ToList();
+// .ToSqlFilter()可以有效的防注入 原理和参数化一样 将'转成''
+// 我们可以用Sqlprofile监控SqlServer参数化后到数据库的样子，也是这么转换的
+
+// 为什么没有表达式用例
+// 不是页面传的用什么都不会注入，表达式也没办法从页面传进来
+// 动态排序按上面例子写就行了
+```
+
+### Where
+
+动态条件非常常见，90%以上都是通过条件参数进行的 SQL 注入，构造简单。
+
+1. **表格查询 防注入**
+
+   当列名和值都从页面传我们就需要表格查询。
+
+   这一类动态列名和值的场景，更适合复用表格查询思路。
+
+2. **参数化 防注入**
+
+   ```csharp
+   List<Order> list = db.Queryable<Order>().Where("id=@id", new { id = 页面参数 }).ToList();
+   ```
+
+3. **表达式 防注入**
+
+   ```csharp
+   db.Queryable<Student>().Where(it => it.Id == 页面参数).ToList() // 只要用到表达式就没有注入风险
+   ```
+
+## 总结
+
+1. 增、删、改只要不用 SQL 去写【不需要考虑注入】
+2. 查询用表达式操作【不需要考虑注入】
+3. 手写 SQL"外部参数"用参数化【不需要考虑注入】
+4. 手写 SQL 没有参数化或者不能参数化看 2.1 和 2.2
+5. `SqlFunc.MappingColumn<string>(sql)` 这种使用 SQL 的函数禁止前端传递，如果要传递可以看 2.1 处理

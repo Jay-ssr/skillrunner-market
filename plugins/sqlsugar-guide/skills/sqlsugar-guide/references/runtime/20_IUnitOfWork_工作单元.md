@@ -1,0 +1,248 @@
+# IUnitOfWork 工作单元
+
+## UOW 学前预习
+
+使用该功能需要对仓储方法有一定了解，工作单元其实是快捷调用仓储方法。
+
+如果你还不熟悉仓储模式，建议先把下面这几个仓储示例读完再继续看工作单元。
+
+## 工作单元优势
+- 超级简单事务使用支持跨方法和多库
+- 超级简单的换库
+- 超级简单的使用仓储
+
+## 手动创建工作单元
+
+### 有泛型
+
+> 注意： using 里面禁止用 try 操作，只有异常了才能回滚
+
+```csharp
+// 不使用事务设置false 例如：db.CreateContext<MyDbContext>(false);
+// 默认带事务 CreateContext<MyDbContext>(IsTran=true) 使用默认需提交uow.Commit()
+
+using (var uow = db.CreateContext<MyDbContext>())
+{
+    // uow.变量.仓储方法
+    uow.Orders.Insert(new OrderInfo() { Id = 1, Name = "order1", Price = 100 });
+    uow.OrderItem.Insert(new OrderItem() { OrderId = 1, Price = 100 });
+
+    // 使用原生对象
+    uow.Orders.AsQueryable().ToList();
+    uow.Orders.AsUpdateable(new OrderInfo() { }).ExecuteCommand();
+
+    // 使用Db
+    uow.Db.Queryable<OrderInfo>().ToList();
+    uow.Db.MasterQueryable<OrderInfo>().ToList(); // 读写分离查询走主库
+
+    // 也可以手动调用仓储
+    // var orderItemDal = uow.GetMyRepository<DbSet<OrderItem>>();
+
+    // 这行不能少
+    uow.Commit(); // 使用事务一定要记得写提交
+}
+
+/// <summary>
+/// 自定义DbContext
+/// </summary>
+public class MyDbContext : SugarUnitOfWork
+{
+    public DbSet<OrderItem> OrderItem { get; set; }
+    public DbSet<OrderInfo> Orders { get; set; }
+}
+
+/// <summary>
+/// 自定义仓储
+/// </summary>
+/// <typeparam name="T"></typeparam>
+public class DbSet<T> : SimpleClient<T> where T : class, new()
+{
+    // 可以重写仓储方法
+    // 可以添加新方法
+}
+```
+
+### 无泛型
+
+直接用比较简单些，可以方便的调用仓储方法。
+
+```csharp
+using (var context = db.CreateContext()) // 默认带事务 CreateContext(IsTran=true)
+{
+    // 使用Orm自带仓储
+    var ds = context.GetRepository<Order>();
+    ds.Insert(list);
+
+    // 使用自定义仓储
+    var ds2 = context.GetMyRepository<Repository<Order>>();
+    ds2.Insert(list);
+
+    // 也可以直接用db
+    context.Db.Queryable<Order>().ToList();
+
+    // 这行不能少
+    context.Commit(); // 使用事务一定要记得写提交
+}
+```
+
+### 接口说明（5.1.3.46-preview08）
+
+```csharp
+// 可以用无SqlSugar接口接收，有些用户想通用接口中不能有SqlSugar对象
+public interface ISugarUnitOfWorkClear
+{
+    RepositoryType GetMyRepository<RepositoryType>() where RepositoryType : new();
+    bool Commit();
+}
+
+// ISugarUnitOfWork 继承 ISugarUnitOfWorkClear
+public interface ISugarUnitOfWork : ISugarUnitOfWorkClear
+{
+    ISqlSugarClient Db { get; }
+    ITenant Tenant { get; }
+    SimpleClient<T> GetRepository<T>() where T : class, new();
+}
+```
+
+## IOC 注入工作单元
+
+### 有泛型 IOC
+
+```csharp
+// SqlSugarScope模式
+services.AddSingleton<ISugarUnitOfWork<MyDbContext>>(it => new SugarUnitOfWork<MyDbContext>(new SqlSugarScope()));
+
+// SqlSugarClient模式所有代码都要到it=>里面去new，写在外面就变成单例会报错
+services.AddScoped<ISugarUnitOfWork<MyDbContext>>(it => new SugarUnitOfWork<MyDbContext>(new SqlSugarClient()));
+
+/// <summary>
+/// 自定义DbContext
+/// </summary>
+public class MyDbContext : SugarUnitOfWork
+{
+    public DbSet<OrderItem> OrderItem { get; set; }
+    public DbSet<OrderInfo> Orders { get; set; }
+}
+
+/// <summary>
+/// 自定义仓储
+/// </summary>
+/// <typeparam name="T"></typeparam>
+public class DbSet<T> : SimpleClient<T> where T : class, new()
+{
+    // 可以重写仓储方法
+    // 可以添加新方法
+}
+```
+
+## 使用工作单元
+
+```csharp
+[ApiController]
+[Route("[controller]")]
+public class WeatherForecastController : ControllerBase
+{
+    ISugarUnitOfWork<MyDbContext> Context;
+
+    public WeatherForecastController(ISugarUnitOfWork<MyDbContext> Context)
+    {
+        this.Context = Context;
+        // 也可以拿到Db
+        // db = Context.Db;
+    }
+
+    [HttpGet]
+    public bool Get()
+    {
+        using (var uow = Context.CreateContext()) // 默认带事务 CreateContext(IsTran=true)
+        {
+            uow.Orders.Insert(new OrderInfo() { Id = 1, Name = "order1", Price = 100 });
+            uow.Orders.Insert(new OrderInfo() { Id = 2, Name = "order2", Price = 200 });
+
+            // 使用原生对象
+            // uow.Orders.AsQueryable().ToList();
+
+            // 使用Db
+            // uow.Db.Queryable<Order>().ToList();
+
+            return uow.Commit(); // 使用带事务记得写提交
+        }
+    }
+}
+```
+
+### 无泛型 IOC
+
+```csharp
+public class ApiService()
+{
+    ISqlSugarClinet _db;
+
+    public ApiService(ISqlSugarClinet db)
+    {
+        _db = db;
+    }
+
+    public void Test()
+    {
+        using (var uow = _db.CreateContext())
+        {
+            var ds = uow.GetRepository<Order>();
+            ds.Insert(list);
+            uow.Commit(); // 使用事务一定要记得写提交
+        }
+    }
+}
+```
+
+## 工作单元自动换库
+
+### 有泛型换库
+
+在工作单元内会根据特性自动切换数据库（注意：如果一个实体对应多个库，这种场景不适合工作单元，更适合多租户或手动换库）
+
+```csharp
+// 多库配置
+// 下面是多库配置示例
+new ConnectionConfig(){ConfigId="0", DbType=DbType.SqlServer, ConnectionString="..", IsAutoCloseConnection=true},
+new ConnectionConfig(){ConfigId="1", DbType=DbType.MySql, ConnectionString="...", IsAutoCloseConnection=true}
+
+// 实体配置
+[Tenant("1")] // 匹配ConfigId
+public class OrderInfo
+{
+    [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+}
+```
+
+### 无泛型换库
+
+需要用自定义仓储才支持自动换库。
+
+```csharp
+var ds2 = context.GetMyRepository<Repository<Order>>();
+ds2.Insert(list);
+```
+
+如果仓储层本身就要跨多库，优先沿用这一章前面的多库配置方式。
+
+## 事务嵌套
+
+```csharp
+// db.Ado.IsNoTran()表示事务为null才开启事务
+using (var uow = db.CreateContext(db.Ado.IsNoTran()))
+{
+    using (var uow2 = db.CreateContext(db.Ado.IsNoTran()))
+    {
+        uow2.Commit();
+    }
+    uow.Commit(); // 禁止用 db.RollBack 工作单元内只要throw会自动回滚
+}
+```
+
+## 特性实现工作单元
+
+这一节直接给出特性方式的工作单元实现。

@@ -1,0 +1,19 @@
+{
+  "name": "skillrunner-market",
+  "description": "SkillRunner Market - High-quality Claude Code skill plugins",
+  "owner": {
+    "name": "Jay-ssr"
+  },
+  "plugins": [
+    {
+      "name": "sqlsugar-guide",
+      "source": "./plugins/sqlsugar-guide",
+      "description": "SqlSugar ORM complete reference knowledge base - 130+ topic files covering query, write, entity modeling, multi-database, source architecture",
+      "version": "1.0.0",
+      "author": { "name": "Jay-ssr" },
+      "license": "MIT",
+      "keywords": ["sqlsugar", "orm", "csharp", "dotnet", "database", "mysql", "sqlserver", "postgresql"],
+      "category": "knowledge-base"
+    }
+  ]
+}

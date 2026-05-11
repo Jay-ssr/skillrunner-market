@@ -1,0 +1,8 @@
+{
+  "name": "sqlsugar-guide",
+  "version": "1.0.0",
+  "description": "SqlSugar ORM complete reference knowledge base",
+  "author": { "name": "Jay-ssr" },
+  "license": "MIT",
+  "skills": ["./skills/sqlsugar-guide"]
+}
