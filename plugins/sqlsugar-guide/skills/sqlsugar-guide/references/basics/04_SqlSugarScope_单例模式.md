@@ -51,8 +51,7 @@ public class SqlSugarHelper // 不能是泛型类
             // Console.WriteLine(UtilMethods.GetSqlString(DbType.SqlServer, sql, pars))
         };
 
-        // 其他全局配置可继续写在这里
-        // db.Ado.IsDisableMasterSlaveSeparation = true;
+        // 其他全局配置可继续写// db.Ado.IsDisableMasterSlaveSeparation = true;
 
         // 多租户场景需分别配置
         // db.GetConnection(i).Aop

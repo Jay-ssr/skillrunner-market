@@ -122,7 +122,7 @@ if (StaticConfig.AppContext_ConvertInfinityDateTime == false)
     AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 }
 
-//如果不想用默认的可以把
+//如果不想用可以把
 StaticConfig.AppContext_ConvertInfinityDateTime = true;  //这样就不走ORM默认
 ```
 

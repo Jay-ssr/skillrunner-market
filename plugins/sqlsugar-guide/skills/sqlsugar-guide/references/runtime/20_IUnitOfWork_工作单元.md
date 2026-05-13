@@ -2,7 +2,7 @@
 
 ## UOW 学前预习
 
-使用该功能需要对仓储方法有一定了解，工作单元其实是快捷调用仓储方法。
+使用该功能需要对仓储方法有一定了解，工作单元是快捷调用仓储方法。
 
 如果你还不熟悉仓储模式，建议先把下面这几个仓储示例读完再继续看工作单元。
 
@@ -39,7 +39,7 @@ using (var uow = db.CreateContext<MyDbContext>())
     // var orderItemDal = uow.GetMyRepository<DbSet<OrderItem>>();
 
     // 这行不能少
-    uow.Commit(); // 使用事务一定要记得写提交
+    uow.Commit(); // 使用事务记得写提交
 }
 
 /// <summary>
@@ -81,7 +81,7 @@ using (var context = db.CreateContext()) // 默认带事务 CreateContext(IsTran
     context.Db.Queryable<Order>().ToList();
 
     // 这行不能少
-    context.Commit(); // 使用事务一定要记得写提交
+    context.Commit(); // 使用事务记得写提交
 }
 ```
 
@@ -189,7 +189,7 @@ public class ApiService()
         {
             var ds = uow.GetRepository<Order>();
             ds.Insert(list);
-            uow.Commit(); // 使用事务一定要记得写提交
+            uow.Commit(); // 使用事务记得写提交
         }
     }
 }

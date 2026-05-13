@@ -75,7 +75,7 @@ public class SQLVO
 {
     [SugarColumn(IsOwnsOne =true)]
     public ITEM1 ITEM1 { get; set; } // item1和item2不能有重复字段
-    
+
     [SugarColumn(IsOwnsOne = true)]
     public ITEM2 ITEM2 { get; set; } // item1和item2不能有重复字段
 }

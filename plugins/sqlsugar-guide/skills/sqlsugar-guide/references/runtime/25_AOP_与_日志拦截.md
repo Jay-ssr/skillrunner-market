@@ -17,7 +17,7 @@
 
 ### 事件示例
 
-注意：AOP 一定要设置在你操作语句之前，不然不会生效，还有必须是同一个 SqlSugarClient 才会有效。
+注意：AOP 设置在你操作语句之前，不然不会生效，还有是同一个 SqlSugarClient 才会有效。
 
 ```csharp
 public SqlSugarClient GetInstance()
@@ -33,7 +33,7 @@ public SqlSugarClient GetInstance()
         // 每次Sql执行前事件
         db.Aop.OnLogExecuting = (sql, pars) =>
         {
-            // 我可以在这里面写逻辑
+            // 我可以面写逻辑
             // 技巧：AOP中获取IOC对象
             // var serviceBuilder = services.BuildServiceProvider();
             // var log = serviceBuilder.GetService<ILogger<WeatherForecastController>>();
@@ -267,7 +267,7 @@ db.Deleteable<Student>(id)
     .ExecuteCommand();
 ```
 
-如果你只想记录差异部分，可以在这里继续裁剪输出字段。
+如果你只想记录差异部分，可以继续裁剪输出字段。
 
 ### 批量配置
 

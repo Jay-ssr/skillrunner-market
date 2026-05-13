@@ -111,7 +111,7 @@ var a = db.DynamicBuilder().CreateClass("a")
 
 var b = db.DynamicBuilder().CreateClass("b")
     .CreateProperty("bid", typeof(int))
-    .CreateProperty("aList", typeof(SqlSugar.NestedObjectTypeList), 
+    .CreateProperty("aList", typeof(SqlSugar.NestedObjectTypeList),
         navigate: new Navigate(NavigateType.OneToMany,nameof(A.bid)))
     .WithCache() // 存入缓存防止多次创建引起内存泄露
     .BuilderTypes(a);

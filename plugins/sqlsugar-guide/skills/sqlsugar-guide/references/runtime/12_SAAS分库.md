@@ -181,7 +181,7 @@ public class OrderManger : DbManger
 ```csharp
 services.AddHttpContextAccessor();
 
-// 注册SqlSugarClient，这里你可以用Options或其他方式配置
+// 注册SqlSugarClient，这里用Options或其他方式配置
 services.AddScoped<ISqlSugarClient>(sp =>
 {
     return new SqlSugarClient(new ConnectionConfig
@@ -257,7 +257,7 @@ WHERE ([o].[Id] = @Id0)
 
 ### 跨库不同服务器
 
-因为基础信息库是固定的，所以可以把基础信息库同步到不同的服务器上，通过读写分离的方式，那么每个业务服务器都会有一个基础信息库了，然后再通过6.5.1的方式实现。
+因为基础信息库是固定的，所以可以把基础信息库同步到不同的服务器上，通过读写分离的方式，那么每个业务服务器都会有一个基础信息库了。再通过6.5.1的方式实现。
 
 ## 业务表创建
 

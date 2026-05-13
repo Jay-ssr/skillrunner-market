@@ -57,7 +57,7 @@ var listDto = db.Queryable<Student>().Select<StudentDto>().ToList();
 
 // 自动返回 Dto + 手动指定字段 (5.1.3.35)
 var listDto = db.Queryable<Student>()
-    .Select(it => new StudentDto() 
+    .Select(it => new StudentDto()
     {
         Count = 100  // 手动指定
     }, true)  // true 表示开启自动映射

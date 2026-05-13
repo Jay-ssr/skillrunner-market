@@ -2,7 +2,7 @@
 
 ## SQL 注入说明
 
-文档上的所有用例都是防注入的，只要按文档上写就不会有问题。唯一需要注意的是手写 SQL 部分并且从前端传进来。
+文档上的所有用例都是防注入的，只要按文档上写就不会有问题。唯一手写 SQL 部分并且从前端传进来。
 
 ## 手写 SQL 部分
 
@@ -22,7 +22,7 @@ db.Queryable<Order>().OrderBy(orderByDbName + " " + OrderByType.Desc).ToList();
 // 自带函数过滤 防注入
 List<Order> list = db.Queryable<Order>().OrderBy(页面参数.ToSqlFilter()).ToList();
 // .ToSqlFilter()可以有效的防注入 原理和参数化一样 将'转成''
-// 我们可以用Sqlprofile监控SqlServer参数化后到数据库的样子，也是这么转换的
+// 用Sqlprofile监控SqlServer参数化后到数据库的样子，也是这么转换的
 
 // 为什么没有表达式用例
 // 不是页面传的用什么都不会注入，表达式也没办法从页面传进来

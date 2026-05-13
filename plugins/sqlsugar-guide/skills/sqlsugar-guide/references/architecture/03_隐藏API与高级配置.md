@@ -150,6 +150,6 @@ var backup = db.QueryFilter.ClearAndBackup();
 db.QueryFilter.Restore(backup);
 
 // 条件注册
-db.QueryFilter.AddTableFilterIF(isAdmin == false, 
+db.QueryFilter.AddTableFilterIF(isAdmin == false,
     u => u.TenantId == currentTenantId);
 ```
