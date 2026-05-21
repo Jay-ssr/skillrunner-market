@@ -165,7 +165,21 @@ MoreSettings = new ConnMoreSettings()
 }
 ```
 
-### 10. 建表更换自增列的方式
+### 10. jsonb 列
+
+用对象/集合类型 + `IsJson = true`，ORM 自动序列化/反序列化：
+
+```csharp
+[SugarColumn(IsJson = true)]
+public WifiConfig? WifiInfo { get; set; }
+
+[SugarColumn(IsJson = true)]
+public List<CyclicConfigItem>? CyclicConfig { get; set; }
+```
+
+> ⚠️ **属性类型用对象，不要用 `string`。** `IsJson = true` 会调 `SerializeObject`：对象类型第一次序列化得到 JSON 文本 ✅；`string` 类型本身已是文本，再序列化多一层引号 ❌。且 PG 拒绝 `text → jsonb` 隐式转换。
+
+### 11. 建表更换自增列的方式
 
 默认 Serial 方式实现自增（兼容低版本 PGSQL），Identity 只支持较高版本 PGSQL：
 ```csharp
